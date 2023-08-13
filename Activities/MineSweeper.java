@@ -36,7 +36,6 @@ public class MineSweeper
         headerPanel.setLayout(new BorderLayout());
         headerPanel.add(resetBtn);
 
-
         msFrame.add(gamePanel);
     }
 }
