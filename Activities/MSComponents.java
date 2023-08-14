@@ -18,8 +18,8 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicButtonUI;
 
 public class MSComponents 
@@ -45,13 +45,13 @@ public class MSComponents
 
     public class MSFrame extends JFrame
     {
-        MSFrame(int width, int height)
+        MSFrame(Dimension size)
         {
             super(TITLE);
             this.setIconImage(Toolkit.getDefaultToolkit().getImage("Images\\Bomb.png"));
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             this.setResizable(false);
-            this.setSize(width, height);
+            this.setSize(size);
 
             Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
             int x = (int) ((dimension.getWidth() - this.getWidth()) / 2);
@@ -61,17 +61,48 @@ public class MSComponents
         }
     }
 
-    public class MSButton extends JButton 
+    public class MSRectangleButton extends JButton 
     { 
         private static final Dimension BTN_DIMENSION = new Dimension(200, 50);
 
-        MSButton(String text) 
+        MSRectangleButton(String text) 
         {
             super(text);
             initialize();
         }
 
-        MSButton(ImageIcon image) 
+        private void initialize()
+        {
+            this.setMaximumSize(BTN_DIMENSION);
+            this.setAlignmentX(Component.CENTER_ALIGNMENT);
+            this.setBackground(PRIMARY_COLOR);
+            this.setBorder(BorderFactory.createRaisedBevelBorder());
+            this.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            this.setFocusPainted(false);
+            this.setFont(BTN_FONT);
+            this.setUI(new BasicButtonUI());
+            this.addMouseListener(new MouseAdapter() 
+            {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    setBorder(BorderFactory.createLoweredBevelBorder());
+                    setFont(BTN_FONT.deriveFont(11f));
+                }
+    
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    setBorder(BorderFactory.createRaisedBevelBorder());
+                    setFont(BTN_FONT.deriveFont(12f));
+                }
+            });
+        }
+    }
+
+    public class MSBoxButton extends JButton 
+    { 
+        private static final Dimension BTN_DIMENSION = new Dimension(30, 30);
+
+        MSBoxButton(ImageIcon image) 
         { 
             this.setIcon(image);
             initialize(); 
@@ -92,35 +123,26 @@ public class MSComponents
                 @Override
                 public void mousePressed(MouseEvent e) {
                     setBorder(BorderFactory.createLoweredBevelBorder());
+                    setFont(BTN_FONT.deriveFont(11f));
                 }
     
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     setBorder(BorderFactory.createRaisedBevelBorder());
+                    setFont(BTN_FONT.deriveFont(12f));
                 }
             });
         }
     }
 
-    public class MSDisplay extends JPanel 
+    public class MSPanel extends JPanel 
     {
-        private static final Dimension DSIPLAY_DIMENSION = new Dimension(52, 100);
-        private static final JLabel displayHolder = new JLabel();
-
-        MSDisplay(int x) 
+        MSPanel() 
         {
-            ImageIcon MS_SEVEN_SEGMENT_PATH = new ImageIcon("Images\\D_" + x + ".png");
-            Image MS_SEVEN_SEGMENT = MS_SEVEN_SEGMENT_PATH.getImage().getScaledInstance(52, 100, Image.SCALE_SMOOTH);
-
-            displayHolder.setIcon(new ImageIcon(MS_SEVEN_SEGMENT));
-            displayHolder.setMaximumSize(DSIPLAY_DIMENSION);
-            displayHolder.setAlignmentX(Component.CENTER_ALIGNMENT);        
-            displayHolder.setHorizontalAlignment(JLabel.CENTER);  
-
-            this.setMaximumSize(DSIPLAY_DIMENSION);
-            this.setAlignmentX(Component.CENTER_ALIGNMENT);
-            this.add(displayHolder); 
+            Border padding = BorderFactory.createEmptyBorder(20, 20, 20, 20);
+            Border raisedBevel = BorderFactory.createRaisedBevelBorder();
+            this.setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
+            this.setBackground(PRIMARY_COLOR);
         }
     }
-    
 }
