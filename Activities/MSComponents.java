@@ -100,7 +100,8 @@ public class MSComponents
 
     public class MSBoxButton extends JButton 
     { 
-        private static final Dimension BTN_DIMENSION = new Dimension(30, 30);
+        private final Dimension BTN_DIMENSION = new Dimension(30, 30);
+        private String STATUS = null;
 
         MSBoxButton(ImageIcon image) 
         { 
@@ -108,12 +109,30 @@ public class MSComponents
             initialize(); 
         }
 
+        MSBoxButton() 
+        { 
+            initialize(); 
+        }
+
+        MSBoxButton(String status) 
+        {
+            setCellStatus(status);
+            initialize(); 
+        }
+
+        protected void setCellStatus(String status) { this.STATUS = status; }
+        protected String getCellStatus() { return this.STATUS; }
+
         private void initialize()
         {
+            Border padding = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+            Border raisedBevel = BorderFactory.createRaisedBevelBorder();
+            Border loweredBevel = BorderFactory.createLoweredBevelBorder();
+
             this.setMaximumSize(BTN_DIMENSION);
             this.setAlignmentX(Component.CENTER_ALIGNMENT);
             this.setBackground(PRIMARY_COLOR);
-            this.setBorder(BorderFactory.createRaisedBevelBorder());
+            this.setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
             this.setCursor(new Cursor(Cursor.HAND_CURSOR));
             this.setFocusPainted(false);
             this.setFont(BTN_FONT);
@@ -122,14 +141,12 @@ public class MSComponents
             {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    setBorder(BorderFactory.createLoweredBevelBorder());
-                    setFont(BTN_FONT.deriveFont(11f));
+                    setBorder(BorderFactory.createCompoundBorder(loweredBevel, padding));
                 }
     
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    setBorder(BorderFactory.createRaisedBevelBorder());
-                    setFont(BTN_FONT.deriveFont(12f));
+                    setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
                 }
             });
         }

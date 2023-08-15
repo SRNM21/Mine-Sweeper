@@ -63,9 +63,9 @@ public class MainMenu
 
 enum GameMode
 {
-    BEGINNER        (8, 8, 10, 10, 350, 280),
-    INTERMEDIATE    (16, 16, 40, 40, 590, 520),
-    EXPERT          (16, 30, 99, 99, 590, 1000);
+    BEGINNER        (8, 8, 10, 10, 475, 320),
+    INTERMEDIATE    (16, 16, 40, 40, 755, 600),
+    EXPERT          (16, 30, 99, 99, 755, 1160);
     
     private final int ROW;
     private final int COL;
