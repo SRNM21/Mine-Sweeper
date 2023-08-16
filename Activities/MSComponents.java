@@ -45,14 +45,16 @@ public class MSComponents
 
     public class MSFrame extends JFrame
     {
-        MSFrame(Dimension size)
+        MSFrame()
         {
             super(TITLE);
             this.setIconImage(Toolkit.getDefaultToolkit().getImage("Images\\Bomb.png"));
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             this.setResizable(false);
-            this.setSize(size);
+        }
 
+        public void showFrame()
+        {
             Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
             int x = (int) ((dimension.getWidth() - this.getWidth()) / 2);
             int y = (int) ((dimension.getHeight() - this.getHeight()) / 2);
