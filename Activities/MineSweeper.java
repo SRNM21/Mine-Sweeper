@@ -19,7 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import Activities.MSComponents.MSBoxButton;
+import Activities.MSComponents.MSButton;
+import Activities.MSComponents.MSCell;
 import Activities.MSComponents.MSFrame;
 import Activities.MSComponents.MSPanel;
 
@@ -28,8 +29,8 @@ public class MineSweeper
     private final MSComponents component = new MSComponents();
     private final ImageIcon MS_ICON = new ImageIcon(component.MS_ICON.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
     private final MSFrame msFrame;
-    private final MSBoxButton resetBtn = component.new MSBoxButton(MS_ICON);    
-    private final MSBoxButton[][] cell;
+    private final MSButton resetBtn = component.new MSButton(MS_ICON);    
+    private final MSCell[][] cellBtn;
     private final MSPanel gamePanel = component.new MSPanel();
 
     private final JPanel gameMenuPanel = new JPanel();
@@ -41,6 +42,8 @@ public class MineSweeper
     private final JLabel flagCounter = new JLabel("000");
     private final JLabel timer = new JLabel("000");
     private final JLabel backToMenu = new JLabel("< Menu");
+
+    private int[][] CELL;
 
     MineSweeper(GameMode mode)
     {
@@ -81,16 +84,9 @@ public class MineSweeper
         minePanel.setBorder(BorderFactory.createLoweredBevelBorder());
         minePanel.setLayout(new GridLayout(mode.getRow(), mode.getCol()));
 
-        cell = new MSBoxButton[mode.getRow()][mode.getCol()];
-
-        for (int i = 0; i < mode.getRow(); i++) {
-            for (int j = 0; j < mode.getCol(); j++) {
-                cell[i][j] = component.new MSBoxButton();
-                cell[i][j].setPreferredSize(new Dimension(35, 35));
-                cell[i][j].setCellStatus(null);
-                minePanel.add(cell[i][j]);
-            }
-        }
+        CELL = new int[mode.getRow()][mode.getCol()];
+        cellBtn = new MSCell[mode.getRow()][mode.getCol()];
+        createCells(mode.getRow(), mode.getCol());
 
         headerPanel.add(flagCounterPanel);
         headerPanel.add(resetBtnPanel);
@@ -105,6 +101,19 @@ public class MineSweeper
         msFrame.add(gamePanel);
         msFrame.pack();
         msFrame.showFrame();
+    }
+
+    private void createCells(int row, int col)
+    {
+        for (int i = 0; i < row; i++) 
+        {
+            for (int j = 0; j < col; j++) 
+            {
+                cellBtn[i][j] = component.new MSCell();
+                cellBtn[i][j].setPreferredSize(new Dimension(35, 35));
+                minePanel.add(cellBtn[i][j]);
+            }
+        }
     }
 
     private void confirmExit()

@@ -9,6 +9,8 @@ import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -19,6 +21,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicButtonUI;
 
@@ -26,7 +29,7 @@ public class MSComponents
 {
     protected final String TITLE = "Mine Sweeper";
     protected final Color PRIMARY_COLOR = new Color(198, 198, 198);
-    protected final Color SECONDARY_COLOR = new Color(173, 181, 189);
+    protected final Color SECONDARY_COLOR = new Color(170, 170, 170);
 
     protected final ImageIcon MS_ICON_PATH = new ImageIcon("Images\\HappyIcon.png");
     protected final Image MS_ICON = MS_ICON_PATH.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
@@ -48,7 +51,7 @@ public class MSComponents
         MSFrame()
         {
             super(TITLE);
-            this.setIconImage(Toolkit.getDefaultToolkit().getImage("Images\\Bomb.png"));
+            this.setIconImage(Toolkit.getDefaultToolkit().getImage("Images\\Mine.png"));
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             this.setResizable(false);
         }
@@ -63,13 +66,19 @@ public class MSComponents
         }
     }
 
-    public class MSRectangleButton extends JButton 
+    public class MSButton extends JButton 
     { 
         private static final Dimension BTN_DIMENSION = new Dimension(200, 50);
 
-        MSRectangleButton(String text) 
+        MSButton(String text) 
         {
             super(text);
+            initialize();
+        }
+
+        MSButton(ImageIcon image)
+        {
+            this.setIcon(image);
             initialize();
         }
 
@@ -100,36 +109,23 @@ public class MSComponents
         }
     }
 
-    public class MSBoxButton extends JButton 
-    { 
+    public class MSCell extends JButton 
+    {
+        protected final ImageIcon MS_FLAG_PATH = new ImageIcon("Images\\Flag.png");
+        protected final Image MS_FLAG = MS_FLAG_PATH.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        
+        protected final ImageIcon MS_MINE_PATH = new ImageIcon("Images\\Mine.png");
+        protected final Image MS_MINE = MS_MINE_PATH.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+
         private final Dimension BTN_DIMENSION = new Dimension(30, 30);
-        private String STATUS = null;
 
-        MSBoxButton(ImageIcon image) 
-        { 
-            this.setIcon(image);
-            initialize(); 
-        }
+        protected boolean MARKED_CELL = false;
+        protected boolean REVEALED_CELL = false;
 
-        MSBoxButton() 
-        { 
-            initialize(); 
-        }
-
-        MSBoxButton(String status) 
-        {
-            setCellStatus(status);
-            initialize(); 
-        }
-
-        protected void setCellStatus(String status) { this.STATUS = status; }
-        protected String getCellStatus() { return this.STATUS; }
-
-        private void initialize()
+        MSCell() 
         {
             Border padding = BorderFactory.createEmptyBorder(5, 5, 5, 5);
             Border raisedBevel = BorderFactory.createRaisedBevelBorder();
-            Border loweredBevel = BorderFactory.createLoweredBevelBorder();
 
             this.setMaximumSize(BTN_DIMENSION);
             this.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -139,18 +135,41 @@ public class MSComponents
             this.setFocusPainted(false);
             this.setFont(BTN_FONT);
             this.setUI(new BasicButtonUI());
+            this.addActionListener(new ActionListener() 
+            {
+                @Override
+                public void actionPerformed(ActionEvent e) 
+                {
+                    if (!MARKED_CELL) revealCell();
+                }
+            });
+
             this.addMouseListener(new MouseAdapter() 
             {
                 @Override
-                public void mousePressed(MouseEvent e) {
-                    setBorder(BorderFactory.createCompoundBorder(loweredBevel, padding));
-                }
-    
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
+                public void mouseClicked(MouseEvent e) 
+                {
+                    if (SwingUtilities.isRightMouseButton(e) && !REVEALED_CELL)
+                    {
+                        if (MARKED_CELL)
+                        {
+                            setIcon(null);
+                            MARKED_CELL = false;
+                        }
+                        else
+                        {
+                            MARKED_CELL = true;
+                            setIcon(new ImageIcon(MS_FLAG));
+                        }
+                    }
                 }
             });
+        }
+        
+        public void revealCell()
+        {
+            REVEALED_CELL = true;
+            this.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
         }
     }
 

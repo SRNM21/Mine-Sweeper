@@ -9,7 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
-import Activities.MSComponents.MSRectangleButton;
+import Activities.MSComponents.MSButton;
 import Activities.MSComponents.MSFrame;
 import Activities.MSComponents.MSPanel;
 
@@ -18,9 +18,9 @@ public class MainMenu
 
     private final MSComponents component = new MSComponents();
     private final MSFrame msFrame = component.new MSFrame();
-    private final MSRectangleButton begginerBtn = component.new MSRectangleButton("Beginner");
-    private final MSRectangleButton intermediateBtn = component.new MSRectangleButton("Intermediate");
-    private final MSRectangleButton expertBtn = component.new MSRectangleButton("Expert");
+    private final MSButton begginerBtn = component.new MSButton("Beginner");
+    private final MSButton intermediateBtn = component.new MSButton("Intermediate");
+    private final MSButton expertBtn = component.new MSButton("Expert");
     private final MSPanel mainmenuPanel = component.new MSPanel();
 
     private final JLabel titleIcon = new JLabel();
@@ -73,18 +73,18 @@ enum GameMode
     
     private final int ROW;
     private final int COL;
-    private final int BOMB;
+    private final int MINE;
     private final int FLAG;
 
-    GameMode(int row, int col, int bomb, int flag)
+    GameMode(int row, int col, int mine, int flag)
     {
         this.ROW = row;
         this.COL = col;
-        this.BOMB = bomb;
+        this.MINE = mine;
         this.FLAG = flag;
     }
 
-    int getBomb() { return this.BOMB; }
+    int getMine() { return this.MINE; }
     int getFlag() { return this.FLAG; }
     int getRow() { return this.ROW; }
     int getCol() { return this.COL; }
