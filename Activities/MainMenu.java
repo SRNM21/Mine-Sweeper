@@ -15,7 +15,6 @@ import Activities.MSComponents.MSPanel;
 
 public class MainMenu
 {
-
     private final MSComponents component = new MSComponents();
     private final MSFrame msFrame = component.new MSFrame();
     private final MSButton begginerBtn = component.new MSButton("Beginner");

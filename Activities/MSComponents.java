@@ -19,7 +19,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicButtonUI;
 
@@ -140,43 +139,18 @@ public class MSComponents
             this.setFocusPainted(false);
             this.setFont(BTN_FONT);
             this.setUI(new BasicButtonUI());
-            this.addMouseListener(new MouseAdapter() 
-            {
-                @Override
-                public void mouseClicked(MouseEvent e) 
-                {
-                    if (SwingUtilities.isRightMouseButton(e) && !isRevealed())
-                    {
-                        if (isMarked())
-                        {
-                            setIcon(null);
-                            MARKED_CELL = false;
-                        }
-                        else
-                        {
-                            MARKED_CELL = true;
-                            setIcon(new ImageIcon(MS_FLAG));
-                        }
-                    }
-                }
-            });
         }
         
-        public void setReveal(boolean x) { this.REVEALED_CELL = x; }
-
+        public void setRevealed(boolean x) { this.REVEALED_CELL = x; }
         public boolean isRevealed() { return this.REVEALED_CELL; }
 
         public void setMine(boolean x) { this.IS_MINE = x; }
-
         public boolean isMine() { return this.IS_MINE; }
 
-        public void setMark(boolean x) { this.MARKED_CELL = x; }
-
+        public void setMarked(boolean x) { this.MARKED_CELL = x; }
         public boolean isMarked() { return this.MARKED_CELL; }
 
-
         public void revealMine() { this.setIcon(new ImageIcon(MS_MINE)); }
-
         public void revealCell() { this.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1)); }
     }
 

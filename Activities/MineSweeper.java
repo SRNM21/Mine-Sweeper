@@ -18,6 +18,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import Activities.MSComponents.MSButton;
 import Activities.MSComponents.MSCell;
@@ -44,9 +45,14 @@ public class MineSweeper
     private final JLabel backToMenu = new JLabel("Menu");
 
     private int[][] CELL;
-
+    private int flags = 0;
+    private int mines = 0;
+    
     MineSweeper(GameMode mode)
     {
+        flags = mode.getFlag();
+        mines = mode.getMine();
+
         msFrame = component.new MSFrame();
         gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
         
@@ -73,6 +79,10 @@ public class MineSweeper
         resetBtnPanel.setLayout(new GridBagLayout());
         timerPanel.setLayout(new GridBagLayout());
 
+        flagCounter.setFont(new Font("Arial", Font.BOLD, 16));
+        timer.setFont(new Font("Arial", Font.BOLD, 16));
+
+        flagCounter.setText(String.valueOf(flags));
         flagCounter.setIcon(new ImageIcon(component.MS_FLAG_PATH.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
         resetBtn.setPreferredSize(new Dimension(45, 45));
         timer.setIcon(new ImageIcon(component.MS_TIMER));
@@ -110,13 +120,39 @@ public class MineSweeper
 
     private void createCells(int row, int col)
     {
+        MouseAdapter cellMA = new MouseAdapter() 
+        {
+            @Override
+            public void mouseClicked(MouseEvent e) 
+            {   
+                MSCell currCell = (MSCell) e.getSource();
+
+                if (SwingUtilities.isRightMouseButton(e) && !currCell.isRevealed())
+                {
+                    if (currCell.isMarked())
+                    {
+                        currCell.setIcon(null);
+                        currCell.setMarked(false);
+                    }
+                    else
+                    {
+                        currCell.setMarked(true);
+                        currCell.setIcon(new ImageIcon(component.MS_FLAG));
+                    }
+                }
+            }
+        };
+
         for (int i = 0; i < row; i++) 
         {
             for (int j = 0; j < col; j++) 
             {
-                cellBtn[i][j] = component.new MSCell();
+                cellBtn[i][j] = component.new MSCell();;
                 cellBtn[i][j].setPreferredSize(new Dimension(35, 35));
+                cellBtn[i][j].addMouseListener(cellMA);
                 minePanel.add(cellBtn[i][j]);
+
+                CELL[i][j] = 0;
             }
         }
     }
