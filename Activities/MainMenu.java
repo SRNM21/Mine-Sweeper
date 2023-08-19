@@ -24,6 +24,7 @@ public class MainMenu
     private final MSPanel mainmenuPanel = component.new MSPanel();
 
     private final JLabel titleIcon = new JLabel();
+    private final JLabel copyright = new JLabel("Developed by: GreggyBoi (SRNM21) @2023");
 
     public static void main(String[] args) { SwingUtilities.invokeLater(() -> new MainMenu()); }
 
@@ -31,10 +32,12 @@ public class MainMenu
     {
         mainmenuPanel.setLayout(new BoxLayout(mainmenuPanel, BoxLayout.Y_AXIS));
 
-        titleIcon.setIcon(new ImageIcon(component.MS_ICON));
+        titleIcon.setIcon(new ImageIcon(component.MS_HAPPY));
         titleIcon.setPreferredSize(new Dimension(200, 200));
         titleIcon.setAlignmentX(Component.CENTER_ALIGNMENT);        
         titleIcon.setHorizontalAlignment(JLabel.CENTER);
+        copyright.setAlignmentX(Component.CENTER_ALIGNMENT);        
+        copyright.setHorizontalAlignment(JLabel.CENTER);
 
         begginerBtn.setPreferredSize(new Dimension(200, 35));
         intermediateBtn.setPreferredSize(new Dimension(200, 35));
@@ -52,6 +55,8 @@ public class MainMenu
         mainmenuPanel.add(intermediateBtn);
         mainmenuPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         mainmenuPanel.add(expertBtn);
+        mainmenuPanel.add(Box.createRigidArea(new Dimension(0, 40)));
+        mainmenuPanel.add(copyright);
 
         msFrame.add(mainmenuPanel);
         msFrame.pack();

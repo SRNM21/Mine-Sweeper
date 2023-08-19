@@ -27,7 +27,7 @@ import Activities.MSComponents.MSPanel;
 public class MineSweeper
 { 
     private final MSComponents component = new MSComponents();
-    private final ImageIcon MS_ICON = new ImageIcon(component.MS_ICON.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+    private final ImageIcon MS_ICON = new ImageIcon(component.MS_HAPPY.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
     private final MSFrame msFrame;
     private final MSButton resetBtn = component.new MSButton(MS_ICON);    
     private final MSCell[][] cellBtn;
@@ -41,7 +41,7 @@ public class MineSweeper
     private final JPanel timerPanel = new JPanel();
     private final JLabel flagCounter = new JLabel("000");
     private final JLabel timer = new JLabel("000");
-    private final JLabel backToMenu = new JLabel("< Menu");
+    private final JLabel backToMenu = new JLabel("Menu");
 
     private int[][] CELL;
 
@@ -52,15 +52,15 @@ public class MineSweeper
         
         backToMenu.setFont(new Font("Arial", Font.BOLD, 14));
         backToMenu.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        backToMenu.setHorizontalAlignment(JLabel.CENTER);
         backToMenu.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        backToMenu.setToolTipText("Back to menu");
+        backToMenu.setToolTipText("Back to menu");    
         backToMenu.addMouseListener(new MouseAdapter() 
         {
             @Override
             public void mouseClicked(MouseEvent e) { confirmExit(); }
         });
 
-        gameMenuPanel.setLayout(new BoxLayout(gameMenuPanel, BoxLayout.X_AXIS));
         gameMenuPanel.setBackground(component.PRIMARY_COLOR);
         gameMenuPanel.add(backToMenu);
 
@@ -69,16 +69,21 @@ public class MineSweeper
         headerPanel.setBorder(BorderFactory.createLoweredBevelBorder());
         headerPanel.setPreferredSize(new Dimension(0, 65));
 
+        flagCounterPanel.setLayout(new GridBagLayout());
         resetBtnPanel.setLayout(new GridBagLayout());
-        resetBtn.setMaximumSize(new Dimension(30, 30));
+        timerPanel.setLayout(new GridBagLayout());
+
+        flagCounter.setIcon(new ImageIcon(component.MS_FLAG_PATH.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+        resetBtn.setPreferredSize(new Dimension(45, 45));
+        timer.setIcon(new ImageIcon(component.MS_TIMER));
         
         flagCounterPanel.setBackground(component.PRIMARY_COLOR);
         resetBtnPanel.setBackground(component.PRIMARY_COLOR);
         timerPanel.setBackground(component.PRIMARY_COLOR);
 
-        flagCounterPanel.add(flagCounter);
+        flagCounterPanel.add(flagCounter, new GridBagConstraints());
         resetBtnPanel.add(resetBtn, new GridBagConstraints());
-        timerPanel.add(timer);
+        timerPanel.add(timer, new GridBagConstraints());
 
         minePanel.setBackground(component.PRIMARY_COLOR);
         minePanel.setBorder(BorderFactory.createLoweredBevelBorder());

@@ -9,8 +9,6 @@ import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -31,8 +29,20 @@ public class MSComponents
     protected final Color PRIMARY_COLOR = new Color(198, 198, 198);
     protected final Color SECONDARY_COLOR = new Color(170, 170, 170);
 
-    protected final ImageIcon MS_ICON_PATH = new ImageIcon("Images\\HappyIcon.png");
-    protected final Image MS_ICON = MS_ICON_PATH.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+    protected final ImageIcon MS_HAPPY_PATH = new ImageIcon("Images\\HappyIcon.png");
+    protected final Image MS_HAPPY = MS_HAPPY_PATH.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+    
+    protected final ImageIcon MS_SAD_PATH = new ImageIcon("Images\\SadIcon.png");
+    protected final Image MS_SAD = MS_SAD_PATH.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+    
+    protected final ImageIcon MS_TIMER_PATH = new ImageIcon("Images\\Timer.png");
+    protected final Image MS_TIMER = MS_TIMER_PATH.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+    
+    protected final ImageIcon MS_FLAG_PATH = new ImageIcon("Images\\Flag.png");
+    protected final Image MS_FLAG = MS_FLAG_PATH.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        
+    protected final ImageIcon MS_MINE_PATH = new ImageIcon("Images\\Mine.png");
+    protected final Image MS_MINE = MS_MINE_PATH.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
     private Font BTN_FONT;
 
     MSComponents()
@@ -111,18 +121,13 @@ public class MSComponents
 
     public class MSCell extends JButton 
     {
-        protected final ImageIcon MS_FLAG_PATH = new ImageIcon("Images\\Flag.png");
-        protected final Image MS_FLAG = MS_FLAG_PATH.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-        
-        protected final ImageIcon MS_MINE_PATH = new ImageIcon("Images\\Mine.png");
-        protected final Image MS_MINE = MS_MINE_PATH.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
-
         private final Dimension BTN_DIMENSION = new Dimension(30, 30);
 
-        protected boolean MARKED_CELL = false;
-        protected boolean REVEALED_CELL = false;
+        private boolean MARKED_CELL = false;
+        private boolean REVEALED_CELL = false;
+        private boolean IS_MINE = false;
 
-        MSCell() 
+        MSCell()
         {
             Border padding = BorderFactory.createEmptyBorder(5, 5, 5, 5);
             Border raisedBevel = BorderFactory.createRaisedBevelBorder();
@@ -135,23 +140,14 @@ public class MSComponents
             this.setFocusPainted(false);
             this.setFont(BTN_FONT);
             this.setUI(new BasicButtonUI());
-            this.addActionListener(new ActionListener() 
-            {
-                @Override
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if (!MARKED_CELL) revealCell();
-                }
-            });
-
             this.addMouseListener(new MouseAdapter() 
             {
                 @Override
                 public void mouseClicked(MouseEvent e) 
                 {
-                    if (SwingUtilities.isRightMouseButton(e) && !REVEALED_CELL)
+                    if (SwingUtilities.isRightMouseButton(e) && !isRevealed())
                     {
-                        if (MARKED_CELL)
+                        if (isMarked())
                         {
                             setIcon(null);
                             MARKED_CELL = false;
@@ -166,11 +162,22 @@ public class MSComponents
             });
         }
         
-        public void revealCell()
-        {
-            REVEALED_CELL = true;
-            this.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1));
-        }
+        public void setReveal(boolean x) { this.REVEALED_CELL = x; }
+
+        public boolean isRevealed() { return this.REVEALED_CELL; }
+
+        public void setMine(boolean x) { this.IS_MINE = x; }
+
+        public boolean isMine() { return this.IS_MINE; }
+
+        public void setMark(boolean x) { this.MARKED_CELL = x; }
+
+        public boolean isMarked() { return this.MARKED_CELL; }
+
+
+        public void revealMine() { this.setIcon(new ImageIcon(MS_MINE)); }
+
+        public void revealCell() { this.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1)); }
     }
 
     public class MSPanel extends JPanel 
