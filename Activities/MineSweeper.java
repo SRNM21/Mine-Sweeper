@@ -1,5 +1,6 @@
 package Activities;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -8,8 +9,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -45,13 +49,22 @@ public class MineSweeper
     private final JLabel backToMenu = new JLabel("Menu");
 
     private int[][] CELL;
+    private int row = 0;
+    private int col = 0;
     private int flags = 0;
     private int mines = 0;
     
     MineSweeper(GameMode mode)
     {
+        row = mode.getRow();
+        col = mode.getCol();
         flags = mode.getFlag();
         mines = mode.getMine();
+        
+        CELL = new int[row][col];
+        cellBtn = new MSCell[row][col];
+        createCells(row, col);
+        placeMines();
 
         msFrame = component.new MSFrame();
         gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
@@ -99,10 +112,6 @@ public class MineSweeper
         minePanel.setBorder(BorderFactory.createLoweredBevelBorder());
         minePanel.setLayout(new GridLayout(mode.getRow(), mode.getCol()));
 
-        CELL = new int[mode.getRow()][mode.getCol()];
-        cellBtn = new MSCell[mode.getRow()][mode.getCol()];
-        createCells(mode.getRow(), mode.getCol());
-
         headerPanel.add(flagCounterPanel);
         headerPanel.add(resetBtnPanel);
         headerPanel.add(timerPanel);
@@ -112,7 +121,7 @@ public class MineSweeper
         gamePanel.add(headerPanel);
         gamePanel.add(Box.createRigidArea(new Dimension(0, 20)));
         gamePanel.add(minePanel);
-        
+        debugCell();
         msFrame.add(gamePanel);
         msFrame.pack();
         msFrame.showFrame();
@@ -133,11 +142,50 @@ public class MineSweeper
                     {
                         currCell.setIcon(null);
                         currCell.setMarked(false);
+                        flagCounter.setText(String.valueOf(++flags));
                     }
-                    else
+                    else if (flags > 0)
                     {
                         currCell.setMarked(true);
                         currCell.setIcon(new ImageIcon(component.MS_FLAG));
+                        flagCounter.setText(String.valueOf(--flags));
+                    }
+                }
+            }
+        };
+
+        ActionListener cellAC = new ActionListener() 
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) 
+            {
+                MSCell currCell = (MSCell) e.getSource();
+                String[] nameCell = currCell.getName().split("-");
+
+                int r = Integer.valueOf(nameCell[0]);
+                int c = Integer.valueOf(nameCell[1]);
+
+                if (!currCell.isRevealed() && !currCell.isMarked())
+                {
+                    currCell.setRevealed(true);
+                    currCell.revealCell();
+
+                    if (currCell.isMine()) currCell.revealMine();
+                    if (CELL[r][c] > 0)
+                    {
+                        switch (CELL[r][c]) 
+                        {
+                            case 1: currCell.setForeground(new Color(0, 0, 255));       break;
+                            case 2: currCell.setForeground(new Color(0, 128, 0));       break;
+                            case 3: currCell.setForeground(new Color(255, 0, 0));       break;
+                            case 4: currCell.setForeground(new Color(0, 0, 128));       break;
+                            case 5: currCell.setForeground(new Color(128, 0, 0));       break;
+                            case 6: currCell.setForeground(new Color(0, 128, 128));     break;
+                            case 7: currCell.setForeground(new Color(0, 0, 0));         break;
+                            case 8: currCell.setForeground(new Color(128, 128, 128));   break;
+                        }
+
+                        currCell.setText(String.valueOf(CELL[r][c]));
                     }
                 }
             }
@@ -147,15 +195,60 @@ public class MineSweeper
         {
             for (int j = 0; j < col; j++) 
             {
-                cellBtn[i][j] = component.new MSCell();;
+                cellBtn[i][j] = component.new MSCell();
                 cellBtn[i][j].setPreferredSize(new Dimension(35, 35));
                 cellBtn[i][j].addMouseListener(cellMA);
+                cellBtn[i][j].addActionListener(cellAC);
+                cellBtn[i][j].setName(i + "-" + j);
                 minePanel.add(cellBtn[i][j]);
 
                 CELL[i][j] = 0;
             }
         }
     }
+
+    private void placeMines()
+    {
+        Random rand = new Random();
+        int i = 0;
+
+        while (i < mines)
+        {
+            int r = rand.nextInt(row);
+            int c = rand.nextInt(col);
+
+            if (!cellBtn[r][c].isMine())
+            {
+                cellBtn[r][c].setMine(true);
+                i++;
+            }
+        }
+
+        setMineAdjacent();
+    }
+
+    private void setMineAdjacent()
+    {
+        for (int r = 0; r < row; r++) 
+        {
+            for (int c = 0; c < col; c++) 
+            {
+                if (cellBtn[r][c].isMine())
+                {
+                    if (inBoundCell(r - 1, c - 1))  CELL[r - 1][c - 1]++;
+                    if (inBoundCell(r - 1, c))      CELL[r - 1][c]++;
+                    if (inBoundCell(r - 1, c + 1))  CELL[r - 1][c + 1]++;
+                    if (inBoundCell(r, c - 1))      CELL[r][c - 1]++;
+                    if (inBoundCell(r, c + 1))      CELL[r][c + 1]++;
+                    if (inBoundCell(r + 1, c - 1))  CELL[r + 1][c - 1]++;
+                    if (inBoundCell(r + 1, c))      CELL[r + 1][c]++;
+                    if (inBoundCell(r + 1, c + 1))  CELL[r + 1][c + 1]++;
+                }
+            }
+        }
+    }
+
+    private boolean inBoundCell(int r, int c) { return (r >= 0 && r < row) && (c >= 0 && c < col) && (!cellBtn[r][c].isMine()); }
 
     private void confirmExit()
     {
@@ -165,6 +258,40 @@ public class MineSweeper
         {             
             new MainMenu();
             msFrame.dispose();
+        }
+    }
+
+    private void debugCell()
+    {
+        for (int i = 0; i < row; i++) 
+        {
+            for (int j = 0; j < col; j++) 
+            {
+                MSCell currCell = cellBtn[i][j];
+                if (!currCell.isRevealed() && !currCell.isMarked())
+                {
+                    currCell.setRevealed(true);
+                    currCell.revealCell();
+
+                    if (currCell.isMine()) currCell.revealMine();
+                    if (CELL[i][j] > 0)
+                    {
+                        switch (CELL[i][j]) 
+                        {
+                            case 1: currCell.setForeground(new Color(0, 0, 255));       break;
+                            case 2: currCell.setForeground(new Color(0, 128, 0));       break;
+                            case 3: currCell.setForeground(new Color(255, 0, 0));       break;
+                            case 4: currCell.setForeground(new Color(0, 0, 128));       break;
+                            case 5: currCell.setForeground(new Color(128, 0, 0));       break;
+                            case 6: currCell.setForeground(new Color(0, 128, 128));     break;
+                            case 7: currCell.setForeground(new Color(0, 0, 0));         break;
+                            case 8: currCell.setForeground(new Color(128, 128, 128));   break;
+                        }
+
+                        currCell.setText(String.valueOf(CELL[i][j]));
+                    }
+                }
+            }
         }
     }
 }
