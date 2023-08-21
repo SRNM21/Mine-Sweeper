@@ -9,6 +9,8 @@ import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -18,7 +20,9 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicButtonUI;
 
@@ -119,19 +123,58 @@ public class MSComponents
     }
 
     public class MSCell extends JButton 
-    {
-        private final Dimension BTN_DIMENSION = new Dimension(30, 30);
+    { 
+        private final Border padding = BorderFactory.createEmptyBorder(5, 5, 5, 5);
+        private final Border raisedBevel = BorderFactory.createRaisedBevelBorder();
+        private final Dimension BTN_DIMENSION = new Dimension(35, 35);
+        private JLabel PARENT_LABEL = new JLabel();
 
         private boolean MARKED_CELL = false;
         private boolean REVEALED_CELL = false;
         private boolean IS_MINE = false;
+        private int MINE_ADJACENT = 0;
+        private static int FLAGS = 0;
+        
+        MouseAdapter cellMA = new MouseAdapter() 
+        {
+            @Override
+            public void mouseClicked(MouseEvent e) 
+            {   
+                MSCell currCell = (MSCell) e.getSource();
+
+                if (SwingUtilities.isRightMouseButton(e) && !currCell.isRevealed())
+                {
+                    if (currCell.isMarked())
+                    {
+                        currCell.setIcon(null);
+                        currCell.setMarked(false);
+                        PARENT_LABEL.setText(String.valueOf(++FLAGS));
+                    }
+                    else if (FLAGS > 0)
+                    {
+                        currCell.setMarked(true);
+                        currCell.setIcon(new ImageIcon(MS_FLAG));
+                        PARENT_LABEL.setText(String.valueOf(--FLAGS));
+                    }
+                }
+            }
+        };
+
+        ActionListener cellAC = new ActionListener() 
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) 
+            {
+                MSCell currCell = (MSCell) e.getSource();
+
+                if (!currCell.isRevealed() && !currCell.isMarked()) currCell.revealCell();
+            }
+        };
 
         MSCell()
         {
-            Border padding = BorderFactory.createEmptyBorder(5, 5, 5, 5);
-            Border raisedBevel = BorderFactory.createRaisedBevelBorder();
-
-            this.setMaximumSize(BTN_DIMENSION);
+            this.setMaximumSize(BTN_DIMENSION);            
+            this.setPreferredSize(new Dimension(35, 35));
             this.setAlignmentX(Component.CENTER_ALIGNMENT);
             this.setBackground(PRIMARY_COLOR);
             this.setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
@@ -139,6 +182,8 @@ public class MSComponents
             this.setFocusPainted(false);
             this.setFont(BTN_FONT);
             this.setUI(new BasicButtonUI());
+            this.addMouseListener(cellMA);
+            this.addActionListener(cellAC);
         }
         
         public void setRevealed(boolean x) { this.REVEALED_CELL = x; }
@@ -149,9 +194,47 @@ public class MSComponents
 
         public void setMarked(boolean x) { this.MARKED_CELL = x; }
         public boolean isMarked() { return this.MARKED_CELL; }
+        
+        public void setMineAdjacent(int x) { this.MINE_ADJACENT = x; }
+        public int getMineAdjacent() { return this.MINE_ADJACENT; }
+        
+        public void setParentLabel(JLabel x) { this.PARENT_LABEL = x; }
+        public JLabel getParentLabel() { return this.PARENT_LABEL; }
 
-        public void revealMine() { this.setIcon(new ImageIcon(MS_MINE)); }
-        public void revealCell() { this.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1)); }
+        public void setFlag(int x) { MSCell.FLAGS = x; }
+        public int getFlag() { return MSCell.FLAGS; }
+
+        public void revealCell() 
+        { 
+            this.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1)); 
+            this.setRevealed(true);
+
+            if (this.isMine()) this.setIcon(new ImageIcon(MS_MINE));
+            if (MINE_ADJACENT > 0)
+            {
+                switch (MINE_ADJACENT) 
+                {
+                    case 1: this.setForeground(new Color(0, 0, 255));       break;
+                    case 2: this.setForeground(new Color(0, 128, 0));       break;
+                    case 3: this.setForeground(new Color(255, 0, 0));       break;
+                    case 4: this.setForeground(new Color(0, 0, 128));       break;
+                    case 5: this.setForeground(new Color(128, 0, 0));       break;
+                    case 6: this.setForeground(new Color(0, 128, 128));     break;
+                    case 7: this.setForeground(new Color(0, 0, 0));         break;
+                    case 8: this.setForeground(new Color(128, 128, 128));   break;
+                }
+                
+                this.setText(String.valueOf(MINE_ADJACENT));
+            }
+        }
+
+        public void unrevealCell() 
+        { 
+            this.setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
+            this.setRevealed(false);
+            this.setIcon(null);
+            this.setText(null);
+        }
     }
 
     public class MSPanel extends JPanel 
