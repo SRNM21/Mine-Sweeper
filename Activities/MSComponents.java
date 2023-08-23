@@ -9,8 +9,6 @@ import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -160,17 +158,6 @@ public class MSComponents
             }
         };
 
-        ActionListener cellAC = new ActionListener() 
-        {
-            @Override
-            public void actionPerformed(ActionEvent e) 
-            {
-                MSCell currCell = (MSCell) e.getSource();
-
-                if (!currCell.isRevealed() && !currCell.isMarked()) currCell.revealCell();
-            }
-        };
-
         MSCell()
         {
             this.setMaximumSize(BTN_DIMENSION);            
@@ -183,7 +170,6 @@ public class MSComponents
             this.setFont(BTN_FONT);
             this.setUI(new BasicButtonUI());
             this.addMouseListener(cellMA);
-            this.addActionListener(cellAC);
         }
         
         public void setRevealed(boolean x) { this.REVEALED_CELL = x; }
