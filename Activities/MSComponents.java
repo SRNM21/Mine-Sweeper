@@ -18,9 +18,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicButtonUI;
 
@@ -50,7 +48,7 @@ public class MSComponents
     {
         try
         {
-            BTN_FONT = Font.createFont(Font.TRUETYPE_FONT, new File("Font\\mine-sweeper.ttf")).deriveFont(12f);  
+            BTN_FONT = Font.createFont(Font.TRUETYPE_FONT, new File("Font\\mine-sweeper.ttf")).deriveFont(14f);  
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();  
             ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("Font\\mine-sweeper.ttf")));
         }
@@ -101,7 +99,7 @@ public class MSComponents
             this.setBorder(BorderFactory.createRaisedBevelBorder());
             this.setCursor(new Cursor(Cursor.HAND_CURSOR));
             this.setFocusPainted(false);
-            this.setFont(BTN_FONT);
+            this.setFont(BTN_FONT.deriveFont(12f));
             this.setUI(new BasicButtonUI());
             this.addMouseListener(new MouseAdapter() 
             {
@@ -125,38 +123,11 @@ public class MSComponents
         private final Border padding = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         private final Border raisedBevel = BorderFactory.createRaisedBevelBorder();
         private final Dimension BTN_DIMENSION = new Dimension(35, 35);
-        private JLabel PARENT_LABEL = new JLabel();
 
         private boolean MARKED_CELL = false;
         private boolean REVEALED_CELL = false;
         private boolean IS_MINE = false;
         private int MINE_ADJACENT = 0;
-        private static int FLAGS = 0;
-        
-        MouseAdapter cellMA = new MouseAdapter() 
-        {
-            @Override
-            public void mouseClicked(MouseEvent e) 
-            {   
-                MSCell currCell = (MSCell) e.getSource();
-
-                if (SwingUtilities.isRightMouseButton(e) && !currCell.isRevealed())
-                {
-                    if (currCell.isMarked())
-                    {
-                        currCell.setIcon(null);
-                        currCell.setMarked(false);
-                        PARENT_LABEL.setText(String.valueOf(++FLAGS));
-                    }
-                    else if (FLAGS > 0)
-                    {
-                        currCell.setMarked(true);
-                        currCell.setIcon(new ImageIcon(MS_FLAG));
-                        PARENT_LABEL.setText(String.valueOf(--FLAGS));
-                    }
-                }
-            }
-        };
 
         MSCell()
         {
@@ -167,33 +138,36 @@ public class MSComponents
             this.setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
             this.setCursor(new Cursor(Cursor.HAND_CURSOR));
             this.setFocusPainted(false);
-            this.setFont(BTN_FONT);
+            this.setFont(BTN_FONT.deriveFont(18f));
             this.setUI(new BasicButtonUI());
-            this.addMouseListener(cellMA);
         }
         
-        public void setRevealed(boolean x) { this.REVEALED_CELL = x; }
-        public boolean isRevealed() { return this.REVEALED_CELL; }
-
         public void setMine(boolean x) { this.IS_MINE = x; }
         public boolean isMine() { return this.IS_MINE; }
-
-        public void setMarked(boolean x) { this.MARKED_CELL = x; }
-        public boolean isMarked() { return this.MARKED_CELL; }
         
         public void setMineAdjacent(int x) { this.MINE_ADJACENT = x; }
         public int getMineAdjacent() { return this.MINE_ADJACENT; }
-        
-        public void setParentLabel(JLabel x) { this.PARENT_LABEL = x; }
-        public JLabel getParentLabel() { return this.PARENT_LABEL; }
 
-        public void setFlag(int x) { MSCell.FLAGS = x; }
-        public int getFlag() { return MSCell.FLAGS; }
+        public boolean isMarked() { return this.MARKED_CELL; }
+
+        public void markCell() 
+        { 
+            this.MARKED_CELL = true; 
+            this.setIcon(new ImageIcon(MS_FLAG));
+        }
+
+        public void unmarkCell() 
+        { 
+            this.MARKED_CELL = false; 
+            this.setIcon(null);
+        }
+
+        public boolean isRevealed() { return this.REVEALED_CELL; }
 
         public void revealCell() 
-        { 
+        {            
+            this.REVEALED_CELL = true;
             this.setBorder(BorderFactory.createLineBorder(SECONDARY_COLOR, 1)); 
-            this.setRevealed(true);
 
             if (this.isMine()) this.setIcon(new ImageIcon(MS_MINE));
             if (MINE_ADJACENT > 0)
@@ -215,9 +189,9 @@ public class MSComponents
         }
 
         public void unrevealCell() 
-        { 
+        {             
+            this.REVEALED_CELL = false;
             this.setBorder(BorderFactory.createCompoundBorder(raisedBevel, padding));
-            this.setRevealed(false);
             this.setIcon(null);
             this.setText(null);
         }

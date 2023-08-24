@@ -1,5 +1,6 @@
 package Activities;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -12,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
@@ -21,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import Activities.MSComponents.MSButton;
@@ -31,9 +34,10 @@ import Activities.MSComponents.MSPanel;
 public class MineSweeper
 { 
     private final MSComponents component = new MSComponents();
-    private final ImageIcon MS_ICON = new ImageIcon(component.MS_HAPPY.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
+    private final ImageIcon MS_HAPPY = new ImageIcon(component.MS_HAPPY.getScaledInstance(30, 30, Image.SCALE_SMOOTH));    
+    private final ImageIcon MS_SAD = new ImageIcon(component.MS_SAD.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
     private final MSFrame msFrame;
-    private final MSButton resetBtn = component.new MSButton(MS_ICON);    
+    private final MSButton resetBtn = component.new MSButton(MS_HAPPY);    
     private final MSPanel gamePanel = component.new MSPanel();
 
     private final JPanel gameMenuPanel = new JPanel();
@@ -48,6 +52,7 @@ public class MineSweeper
 
     private GameMode gameMode;
     private MSCell[][] cellBtn;
+    private boolean gameOver = false;
     private int row = 0;
     private int col = 0;
     private int flags = 0;
@@ -58,18 +63,15 @@ public class MineSweeper
     
     MineSweeper(GameMode mode)
     {
-        gameMode = mode;
-        row = mode.getRow();
-        col = mode.getCol();
-        flags = mode.getFlag();
-        mines = mode.getMine();
-        cellBtn = new MSCell[row][col];   
-
         msFrame = component.new MSFrame();
         gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
+        
+        setVariables(mode);
+        createCells();
+        placeMines();
+        setCellMineAdjacent();
 
-        startGame(false);
-        resetBtn.addActionListener(e -> startGame(true));
+        resetBtn.addActionListener(e -> resetGame());
         
         backToMenu.setFont(new Font("Arial", Font.BOLD, 14));
         backToMenu.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -130,66 +132,65 @@ public class MineSweeper
         msFrame.showFrame();
     }
     
-    private void startGame(boolean reset)
+    private void setVariables(GameMode mode)
     {
-        if (reset)
-        {
-            timer.stop();
-            sec = 0;
-            min = 0;
-            hrs = 0;
-            flagCounter.setText(String.valueOf(flags));
-            timerLabel.setText(String.valueOf("0s"));
-        }
-
-        createCells(row, col, reset);
-        placeMines();
-        setCellMineAdjacent();
-        //debugCell();
+        gameMode = mode;
+        row = mode.getRow();
+        col = mode.getCol();
+        flags = mode.getFlag();
+        mines = mode.getMine();
+        cellBtn = new MSCell[row][col];   
     }
 
-    private void createCells(int row, int col, boolean reset)
-    {        
-        ActionListener cellAC = new ActionListener() 
-        {
-            @Override
-            public void actionPerformed(ActionEvent e) 
-            {
-                MSCell currCell = (MSCell) e.getSource();
-                String[] cellLoc = currCell.getName().split("-");
-                int r = Integer.valueOf(cellLoc[0]);
-                int c = Integer.valueOf(cellLoc[1]);
+    private void resetGame()
+    {
+        gameOver = false;
+        timer.stop();
+        sec = 0;
+        min = 0;
+        hrs = 0;
 
-                if (!currCell.isMarked()) revealEmptyCells(r, c);
-                timer.start();
-            }
-        };
+        flags = gameMode.getFlag();
+        flagCounter.setText(String.valueOf(flags));
+        timerLabel.setText(String.valueOf("0s"));    
+        resetBtn.setIcon(MS_HAPPY);
 
+        resetCells();
+        placeMines();
+        setCellMineAdjacent();
+    }
+
+    private void resetCells()
+    {
         for (int i = 0; i < row; i++) 
         {
             for (int j = 0; j < col; j++) 
             {   
-                if (!reset) 
-                {
-                    cellBtn[i][j] = component.new MSCell();     
-                    minePanel.add(cellBtn[i][j]);
-                } 
-
-                cellBtn[i][j].setFlag(flags);      
-                cellBtn[i][j].setName(i + "-" + j);      
-                cellBtn[i][j].setParentLabel(flagCounter);  
-                cellBtn[i][j].setRevealed(false);
-                cellBtn[i][j].setMarked(false);      
+                cellBtn[i][j].setBackground(component.PRIMARY_COLOR);    
                 cellBtn[i][j].setMine(false);
                 cellBtn[i][j].setMineAdjacent(0);
                 cellBtn[i][j].unrevealCell();
+                cellBtn[i][j].unmarkCell();
                 cellBtn[i][j].addActionListener(cellAC);
-                
-                if (reset) 
-                {           
-                    cellBtn[i][j].revalidate();
-                    cellBtn[i][j].repaint();
-                }
+                cellBtn[i][j].addMouseListener(cellML);
+                cellBtn[i][j].revalidate();
+                cellBtn[i][j].repaint();
+            }
+        }
+    }
+
+    private void createCells()
+    {        
+        for (int i = 0; i < row; i++) 
+        {
+            for (int j = 0; j < col; j++) 
+            {   
+                cellBtn[i][j] = component.new MSCell();     
+                minePanel.add(cellBtn[i][j]);
+
+                cellBtn[i][j].setName(i + "-" + j);      
+                cellBtn[i][j].addActionListener(cellAC);
+                cellBtn[i][j].addMouseListener(cellML);
             }
         }
     }
@@ -232,8 +233,97 @@ public class MineSweeper
             }
         }
     }
-
+    
     private boolean inBoundCell(int r, int c) { return (r >= 0 && r < row) && (c >= 0 && c < col) && (!cellBtn[r][c].isMine()); }
+
+    private void revealEmptyCells(int r,int c)
+    {
+        if (r < 0 || r >= row || c < 0 || c >= col) return;
+        if (cellBtn[r][c].isRevealed()) return;
+        if (cellBtn[r][c].isMine())
+        {
+            gameOver(cellBtn[r][c]);
+            return;    
+        }
+
+        cellBtn[r][c].revealCell();
+
+        if (cellBtn[r][c].getMineAdjacent() == 0)
+        {
+            revealEmptyCells(r - 1, c - 1);
+            revealEmptyCells(r - 1, c);
+            revealEmptyCells(r - 1, c + 1);
+            revealEmptyCells(r, c - 1);
+            revealEmptyCells(r, c + 1);
+            revealEmptyCells(r + 1, c - 1);
+            revealEmptyCells(r + 1, c);
+            revealEmptyCells(r + 1, c + 1);
+        }
+    }
+
+    private void gameOver(MSCell cell)
+    {            
+        gameOver = true;        
+        timer.stop();
+        timerLabel.setText(timerLabel.getText());    
+        cell.setBackground(Color.RED);
+
+        for (int i = 0; i < row; i++) 
+        {
+            for (int j = 0; j < col; j++) 
+            {
+                if (cellBtn[i][j].isMine() && !cellBtn[i][j].isMarked()) cellBtn[i][j].revealCell();
+                
+                cellBtn[i][j].removeActionListener(cellAC);
+                cellBtn[i][j].removeMouseListener(cellML);
+            }
+        }
+        
+        resetBtn.setIcon(MS_SAD);
+    }
+
+    private MouseListener cellML = new MouseListener() {
+
+        @Override
+        public void mouseClicked(MouseEvent e) 
+        {   
+            MSCell currCell = (MSCell) e.getSource();
+
+            if (SwingUtilities.isRightMouseButton(e) && !currCell.isRevealed())
+            {
+                if (currCell.isMarked())
+                {
+                    currCell.unmarkCell();
+                    flagCounter.setText(String.valueOf(++flags));
+                }
+                else if (flags > 0)
+                {
+                    currCell.markCell();
+                    flagCounter.setText(String.valueOf(--flags));
+                }
+            }
+        }
+
+        @Override public void mousePressed(MouseEvent e) {}
+        @Override public void mouseReleased(MouseEvent e) {}
+        @Override public void mouseEntered(MouseEvent e) {}
+        @Override public void mouseExited(MouseEvent e) {}
+    };
+
+    private ActionListener cellAC = new ActionListener() 
+    {
+        @Override
+        public void actionPerformed(ActionEvent e) 
+        {
+            MSCell currCell = (MSCell) e.getSource();
+            String[] cellLoc = currCell.getName().split("-");
+            int r = Integer.valueOf(cellLoc[0]);
+            int c = Integer.valueOf(cellLoc[1]);
+
+            if (!currCell.isMarked()) revealEmptyCells(r, c);
+            if (!gameOver) timer.start();
+        }
+    };
 
     private Timer timer = new Timer(1000, new ActionListener() 
     {
@@ -262,33 +352,12 @@ public class MineSweeper
             else timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
         }
     });
-
-    private void revealEmptyCells(int r,int c)
-    {
-        if (r < 0 || r >= row || c < 0 || c >= col) return;
-        if (cellBtn[r][c].isRevealed()) return;
-
-        cellBtn[r][c].revealCell();
-
-        if (cellBtn[r][c].getMineAdjacent() == 0)
-        {
-            revealEmptyCells(r - 1, c - 1);
-            revealEmptyCells(r - 1, c);
-            revealEmptyCells(r - 1, c + 1);
-            revealEmptyCells(r, c - 1);
-            revealEmptyCells(r, c + 1);
-            revealEmptyCells(r + 1, c - 1);
-            revealEmptyCells(r + 1, c);
-            revealEmptyCells(r + 1, c + 1);
-        }
-    }
     
-
     private void confirmExit()
     {
-        int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to back to menu?", "Confirmation", JOptionPane.YES_NO_OPTION);
-
-        if (result == JOptionPane.YES_OPTION) 
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to back to menu?", "Confirmation", JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) 
         {             
             new MainMenu();
             msFrame.dispose();
