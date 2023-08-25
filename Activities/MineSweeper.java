@@ -34,9 +34,10 @@ import Activities.MSComponents.MSPanel;
 public class MineSweeper
 { 
     private final MSComponents component = new MSComponents();
+    private final MSFrame msFrame;
     private final ImageIcon MS_HAPPY = new ImageIcon(component.MS_HAPPY.getScaledInstance(30, 30, Image.SCALE_SMOOTH));    
     private final ImageIcon MS_SAD = new ImageIcon(component.MS_SAD.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
-    private final MSFrame msFrame;
+    private final ImageIcon MS_COOL = new ImageIcon(component.MS_COOL.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
     private final MSButton resetBtn = component.new MSButton(MS_HAPPY);    
     private final MSPanel gamePanel = component.new MSPanel();
 
@@ -60,12 +61,13 @@ public class MineSweeper
     private int sec = 0;    
     private int min = 0;
     private int hrs = 0;
+    private int safeCell = 0;
     
     MineSweeper(GameMode mode)
     {
         msFrame = component.new MSFrame();
         gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS));
-        
+
         setVariables(mode);
         createCells();
         placeMines();
@@ -149,6 +151,7 @@ public class MineSweeper
         sec = 0;
         min = 0;
         hrs = 0;
+        safeCell = 0;
 
         flags = gameMode.getFlag();
         flagCounter.setText(String.valueOf(flags));
@@ -171,6 +174,8 @@ public class MineSweeper
                 cellBtn[i][j].setMineAdjacent(0);
                 cellBtn[i][j].unrevealCell();
                 cellBtn[i][j].unmarkCell();
+                cellBtn[i][j].removeActionListener(cellAC);
+                cellBtn[i][j].removeMouseListener(cellML);
                 cellBtn[i][j].addActionListener(cellAC);
                 cellBtn[i][j].addMouseListener(cellML);
                 cellBtn[i][j].revalidate();
@@ -209,6 +214,9 @@ public class MineSweeper
             {
                 cellBtn[r][c].setMine(true);
                 i++;
+
+                // for debugging
+                cellBtn[r][c].setBackground(Color.red);
             }
         }
     }
@@ -240,13 +248,9 @@ public class MineSweeper
     {
         if (r < 0 || r >= row || c < 0 || c >= col) return;
         if (cellBtn[r][c].isRevealed()) return;
-        if (cellBtn[r][c].isMine())
-        {
-            gameOver(cellBtn[r][c]);
-            return;    
-        }
 
         cellBtn[r][c].revealCell();
+        safeCell++;
 
         if (cellBtn[r][c].getMineAdjacent() == 0)
         {
@@ -265,21 +269,32 @@ public class MineSweeper
     {            
         gameOver = true;        
         timer.stop();
-        timerLabel.setText(timerLabel.getText());    
-        cell.setBackground(Color.RED);
+        cell.setBackground(Color.RED);        
+        resetBtn.setIcon(MS_SAD);
 
+        disableCells(true);
+    }
+
+    private void winGame()
+    {
+        timer.stop();        
+        resetBtn.setIcon(MS_COOL);
+        
+        disableCells(false);
+    }
+
+    private void disableCells(boolean showMines)
+    {
         for (int i = 0; i < row; i++) 
         {
             for (int j = 0; j < col; j++) 
             {
-                if (cellBtn[i][j].isMine() && !cellBtn[i][j].isMarked()) cellBtn[i][j].revealCell();
+                if (showMines && (cellBtn[i][j].isMine() && !cellBtn[i][j].isMarked())) cellBtn[i][j].revealCell();
                 
                 cellBtn[i][j].removeActionListener(cellAC);
                 cellBtn[i][j].removeMouseListener(cellML);
             }
         }
-        
-        resetBtn.setIcon(MS_SAD);
     }
 
     private MouseListener cellML = new MouseListener() {
@@ -320,8 +335,13 @@ public class MineSweeper
             int r = Integer.valueOf(cellLoc[0]);
             int c = Integer.valueOf(cellLoc[1]);
 
-            if (!currCell.isMarked()) revealEmptyCells(r, c);
+            if (currCell.isMine()) gameOver(cellBtn[r][c]);
+            else if (!currCell.isMarked()) revealEmptyCells(r, c);
+            
             if (!gameOver) timer.start();
+            if (safeCell == ((row * col) - mines)) winGame();
+
+            System.out.println(safeCell);
         }
     };
 
@@ -344,9 +364,9 @@ public class MineSweeper
                 min = 0;
             }
 
-            if (hrs > 0) timerLabel.setText(String.valueOf(hrs + "h "+ min + "m "+ sec + "s"));
-            else if (min > 0) timerLabel.setText(String.valueOf(min + "m "+ sec + "s"));
-            else timerLabel.setText(String.valueOf(sec + "s"));
+            if (hrs > 0)        timerLabel.setText(String.valueOf(hrs + "h "+ min + "m "+ sec + "s"));
+            else if (min > 0)   timerLabel.setText(String.valueOf(min + "m "+ sec + "s"));
+            else                timerLabel.setText(String.valueOf(sec + "s"));
 
             if (hrs > 0 && gameMode == GameMode.BEGINNER) timerLabel.setFont(new Font("Arial", Font.BOLD, 10));
             else timerLabel.setFont(new Font("Arial", Font.BOLD, 14));

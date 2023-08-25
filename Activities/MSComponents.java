@@ -28,11 +28,14 @@ public class MSComponents
     protected final Color PRIMARY_COLOR = new Color(198, 198, 198);
     protected final Color SECONDARY_COLOR = new Color(170, 170, 170);
 
-    protected final ImageIcon MS_HAPPY_PATH = new ImageIcon("Images\\HappyIcon.png");
+    protected final ImageIcon MS_HAPPY_PATH = new ImageIcon("Images\\HappyFace.png");
     protected final Image MS_HAPPY = MS_HAPPY_PATH.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
     
-    protected final ImageIcon MS_SAD_PATH = new ImageIcon("Images\\SadIcon.png");
+    protected final ImageIcon MS_SAD_PATH = new ImageIcon("Images\\SadFace.png");
     protected final Image MS_SAD = MS_SAD_PATH.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+    
+    protected final ImageIcon MS_COOL_PATH = new ImageIcon("Images\\CoolFace.png");
+    protected final Image MS_COOL = MS_COOL_PATH.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
     
     protected final ImageIcon MS_TIMER_PATH = new ImageIcon("Images\\Timer.png");
     protected final Image MS_TIMER = MS_TIMER_PATH.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
