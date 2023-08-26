@@ -61,6 +61,7 @@ public class MineSweeper
     private int sec = 0;    
     private int min = 0;
     private int hrs = 0;
+    private int revealedCell = 0;
     private int safeCell = 0;
     
     MineSweeper(GameMode mode)
@@ -101,8 +102,6 @@ public class MineSweeper
         flagCounter.setFont(new Font("Arial", Font.BOLD, 14));
         timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
-        flagCounter.setText(String.valueOf(flags));
-        flagCounter.setName("flagCounter");
         flagCounter.setIcon(new ImageIcon(component.MS_FLAG_PATH.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
         resetBtn.setPreferredSize(new Dimension(45, 45));
         timerLabel.setIcon(new ImageIcon(component.MS_TIMER));
@@ -141,7 +140,9 @@ public class MineSweeper
         col = mode.getCol();
         flags = mode.getFlag();
         mines = mode.getMine();
+        safeCell = (row * col) - mines;
         cellBtn = new MSCell[row][col];   
+        flagCounter.setText(String.valueOf(flags));
     }
 
     private void resetGame()
@@ -151,7 +152,7 @@ public class MineSweeper
         sec = 0;
         min = 0;
         hrs = 0;
-        safeCell = 0;
+        revealedCell = 0;
 
         flags = gameMode.getFlag();
         flagCounter.setText(String.valueOf(flags));
@@ -216,7 +217,7 @@ public class MineSweeper
                 i++;
 
                 // for debugging
-                cellBtn[r][c].setBackground(Color.red);
+                //cellBtn[r][c].setBackground(Color.red);
             }
         }
     }
@@ -250,7 +251,7 @@ public class MineSweeper
         if (cellBtn[r][c].isRevealed()) return;
 
         cellBtn[r][c].revealCell();
-        safeCell++;
+        revealedCell++;
 
         if (cellBtn[r][c].getMineAdjacent() == 0)
         {
@@ -319,10 +320,10 @@ public class MineSweeper
             }
         }
 
-        @Override public void mousePressed(MouseEvent e) {}
-        @Override public void mouseReleased(MouseEvent e) {}
-        @Override public void mouseEntered(MouseEvent e) {}
-        @Override public void mouseExited(MouseEvent e) {}
+        @Override public void mousePressed(MouseEvent e){}
+        @Override public void mouseReleased(MouseEvent e){}
+        @Override public void mouseEntered(MouseEvent e){}
+        @Override public void mouseExited(MouseEvent e){}
     };
 
     private ActionListener cellAC = new ActionListener() 
@@ -339,9 +340,7 @@ public class MineSweeper
             else if (!currCell.isMarked()) revealEmptyCells(r, c);
             
             if (!gameOver) timer.start();
-            if (safeCell == ((row * col) - mines)) winGame();
-
-            System.out.println(safeCell);
+            if (revealedCell == safeCell) winGame();
         }
     };
 
@@ -368,8 +367,10 @@ public class MineSweeper
             else if (min > 0)   timerLabel.setText(String.valueOf(min + "m "+ sec + "s"));
             else                timerLabel.setText(String.valueOf(sec + "s"));
 
-            if (hrs > 0 && gameMode == GameMode.BEGINNER) timerLabel.setFont(new Font("Arial", Font.BOLD, 10));
-            else timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+            if (hrs > 0 && gameMode == GameMode.BEGINNER) 
+                timerLabel.setFont(new Font("Arial", Font.BOLD, 10));
+            else 
+                timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
         }
     });
     
