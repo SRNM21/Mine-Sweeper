@@ -216,8 +216,8 @@ public class MineSweeper
                 cellBtn[r][c].setMine(true);
                 i++;
 
-                // for debugging
-                //cellBtn[r][c].setBackground(Color.red);
+                // for debugging [SHOW MINES]
+                // cellBtn[r][c].setBackground(Color.red);
             }
         }
     }
